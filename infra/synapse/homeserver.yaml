@@ -1,0 +1,54 @@
+# Family Messenger — Matrix Synapse Hardened Base Configuration (Phase 0)
+# Temporary local test server_name is defined in /etc/matrix-synapse/conf.d/server_name.yaml
+# Database credentials & secrets are injected via /etc/matrix-synapse/conf.d/secrets.yaml (0640 root:matrix-synapse)
+
+pid_file: "/var/run/matrix-synapse.pid"
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses:
+      - '127.0.0.1'
+    resources:
+      - names:
+          - client
+        compress: false
+
+# Media Storage configuration
+media_store_path: "/var/lib/matrix-synapse/media"
+max_upload_size: "50M"
+url_preview_enabled: false
+enable_media_repo: true
+
+# Registration & Access Control (Private Family Instance)
+enable_registration: false
+enable_registration_without_verification: false
+allow_guest_access: false
+require_auth_for_profile_requests: true
+limit_profile_requests_to_users_who_share_rooms: true
+allow_public_rooms_without_auth: false
+allow_public_rooms_over_federation: false
+default_room_version: "10"
+
+# Mandatory E2EE by default for all private/invite rooms
+encryption_enabled_by_default_for_room_type: all
+
+# Federation Lockdown (Documented Synapse Mechanisms)
+# 1. No 'federation' listener resource above (only 'client')
+# 2. Empty whitelist blocks all incoming/outgoing federation domains
+federation_domain_whitelist: []
+# 3. Disable outbound federation sender completely
+send_federation: false
+# 4. Do not query external matrix.org key servers
+trusted_key_servers: []
+suppress_key_server_warning: true
+
+# Telemetry & Metrics disabled for maximum privacy
+report_stats: false
+enable_metrics: false
+
+# Signing key & logging
+signing_key_path: "/etc/matrix-synapse/homeserver.signing.key"
+log_config: "/etc/matrix-synapse/log.yaml"

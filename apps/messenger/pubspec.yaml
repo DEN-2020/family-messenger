@@ -1,0 +1,29 @@
+name: family_messenger
+description: Private End-to-End Encrypted Family Messenger (Android, Windows, iOS).
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.38.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  design_system:
+    path: ../../packages/design_system
+  messenger_core:
+    path: ../../packages/messenger_core
+  flutter_vodozemac: ^0.8.1
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/certs/family-messenger-root-ca.crt

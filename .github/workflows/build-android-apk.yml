@@ -1,0 +1,91 @@
+name: Build Android Release APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build & Publish Release APK (Flutter + Rust Vodozemac)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Rust toolchain with Android targets for flutter_vodozemac
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Cache Cargo registry and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/pubspec.yaml') }}
+
+      - name: Ensure Android SDK Platform 36 & NDK 28.2.13676358 are installed
+        run: |
+          yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
+          ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358"
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies & run static analysis
+        run: |
+          flutter --version
+          cd packages/design_system && flutter pub get && flutter analyze
+          cd ../messenger_core && flutter pub get && flutter analyze
+          cd ../../apps/messenger && flutter pub get && flutter analyze
+          flutter test
+
+      - name: Build Android Release APK
+        working-directory: apps/messenger
+        run: |
+          flutter build apk --release --target-platform android-arm64,android-x64
+          cp build/app/outputs/flutter-apk/app-release.apk ../../family-messenger-release.apk
+          ls -lh ../../family-messenger-release.apk
+
+      - name: Upload Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-messenger-release-apk
+          path: family-messenger-release.apk
+          if-no-files-found: error
+
+      - name: Publish APK to GitHub Release (v0.1.0-phase0)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1.0-phase0
+          name: "Family Messenger v0.1.0 (Phase 0 Release APK)"
+          body: |
+            ## Family Messenger — Android Release APK (Phase 0)
+            - **Matrix SDK + Rust Vodozemac E2EE** (`m.megolm.v1.aes-sha2`)
+            - **Pre-configured Wi-Fi Homeserver**: `https://192.168.2.122:8443` (with bundled `Family Messenger Test Root CA` for strict TLS verification)
+            - **Test Accounts**:
+              - `alice_test` / `AliceTest!2026#Family`
+              - `bob_test` / `BobTest!2026#Family`
+          files: |
+            family-messenger-release.apk
+            infra/reverse-proxy/certs/family-messenger-root-ca.crt
+          prerelease: false
+          make_latest: true
