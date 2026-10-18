@@ -13,10 +13,15 @@ $ErrorActionPreference = "Stop"
 
 switch ($Action) {
     "status" {
+        Write-Host "=== Linux Systemd Services (WSL2 Ubuntu-24.04) ===" -ForegroundColor Cyan
         wsl -d Ubuntu-24.04 -u root -- bash -c "systemctl status postgresql matrix-synapse nginx --no-pager"
+        Write-Host "`n=== Tailscale Funnel Status ===" -ForegroundColor Cyan
+        & "C:\Program Files\Tailscale\tailscale.exe" funnel status
+        Write-Host "`n=== Windows Watchdog Scheduled Task ===" -ForegroundColor Cyan
+        Get-ScheduledTask -TaskName "FamilyMessenger-Watchdog" -ErrorAction SilentlyContinue | Get-ScheduledTaskInfo | Select-Object TaskName, LastRunTime, LastTaskResult, NextRunTime
     }
     "start" {
-        wsl -d Ubuntu-24.04 -u root -- bash -c "systemctl start postgresql matrix-synapse nginx && /usr/local/bin/family-messenger-healthcheck"
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\family-messenger-watchdog.ps1"
     }
     "stop" {
         wsl -d Ubuntu-24.04 -u root -- bash -c "systemctl stop nginx matrix-synapse"

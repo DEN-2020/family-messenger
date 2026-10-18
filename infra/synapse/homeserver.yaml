@@ -16,11 +16,25 @@ listeners:
           - client
         compress: false
 
+public_baseurl: "https://asrock.tail56bf63.ts.net/"
+
 # Media Storage configuration
 media_store_path: "/var/lib/matrix-synapse/media"
-max_upload_size: "50M"
+max_upload_size: "100M"
 url_preview_enabled: false
 enable_media_repo: true
+
+# Explicit Rate Limiting against brute-force & abuse
+rc_login:
+  address:
+    per_second: 0.5
+    burst_count: 10
+  account:
+    per_second: 0.5
+    burst_count: 10
+  failed_attempts:
+    per_second: 0.15
+    burst_count: 5
 
 # Registration & Access Control (Private Family Instance)
 enable_registration: false

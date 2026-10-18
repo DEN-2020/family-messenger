@@ -86,9 +86,13 @@
   - [infra/backups/backup.sh](file:///c:/Users/Admin/Documents/Family%20Messenger/infra/backups/backup.sh)
   - [infra/backups/restore.sh](file:///c:/Users/Admin/Documents/Family%20Messenger/infra/backups/restore.sh)
   - [infra/backups/verify_backup_and_restore.sh](file:///c:/Users/Admin/Documents/Family%20Messenger/infra/backups/verify_backup_and_restore.sh)
-- Скрипты Windows PowerShell (`scripts/windows/`):
+- Скрипты Windows PowerShell и LAN-мост (`scripts/windows/`):
   - [scripts/windows/check-environment.ps1](file:///c:/Users/Admin/Documents/Family%20Messenger/scripts/windows/check-environment.ps1)
   - [scripts/windows/manage-server.ps1](file:///c:/Users/Admin/Documents/Family%20Messenger/scripts/windows/manage-server.ps1)
+  - [scripts/windows/lan-tls-bridge.py](file:///c:/Users/Admin/Documents/Family%20Messenger/scripts/windows/lan-tls-bridge.py)
+  - [scripts/windows/start-lan-bridge.ps1](file:///c:/Users/Admin/Documents/Family%20Messenger/scripts/windows/start-lan-bridge.ps1)
+- GitHub Actions CI/CD (`.github/workflows/`):
+  - [.github/workflows/build-android-apk.yml](file:///c:/Users/Admin/Documents/Family%20Messenger/.github/workflows/build-android-apk.yml)
 - Клиентские пакеты и приложение Flutter:
   - [packages/design_system/pubspec.yaml](file:///c:/Users/Admin/Documents/Family%20Messenger/packages/design_system/pubspec.yaml)
   - [packages/design_system/lib/design_system.dart](file:///c:/Users/Admin/Documents/Family%20Messenger/packages/design_system/lib/design_system.dart)
@@ -103,7 +107,7 @@
 
 ## 5. Работает ли Matrix Synapse
 
-**Да.** Matrix Synapse `1.163.0` запущен под управлением `systemd`, использует временный тестовый `server_name: test.family.internal` (чтобы не создавать постоянных аккаунтов до утверждения продакшен-домена), отвечает `OK` на `https://localhost:8443/health` и отдаёт поддерживаемые версии спецификации Matrix (`r0.0.1` — `v1.15`) с активными флагами принудительного шифрования `io.element.e2ee_forced.*: true`.
+**Да.** Matrix Synapse `1.163.0` запущен под управлением `systemd`, использует временный тестовый `server_name: test.family.internal` (чтобы не создавать постоянных аккаунтов до утверждения продакшен-домена), отвечает `OK` на `https://192.168.2.122:8443/health` (и `https://localhost:8443/health`) и отдаёт поддерживаемые версии спецификации Matrix (`r0.0.1` — `v1.15`) с активными флагами принудительного шифрования `io.element.e2ee_forced.*: true`.
 
 ---
 
@@ -115,19 +119,19 @@
 
 ## 7. Реализована ли тестовая переписка
 
-**Да.** Созданы два тестовых пользователя (`@alice_test:test.family.internal` и `@bob_test:test.family.internal`), создана зашифрованная комната `!OqNXSstVCyHduxokTQ:test.family.internal`, выполнен двусторонний обмен сообщениями между двумя независимыми клиентскими экземплярами с отдельными локальными базами SQLite (`MatrixSdkDatabase`).
+**Да.** Созданы два тестовых пользователя (`@alice_test:test.family.internal` и `@bob_test:test.family.internal`), создана зашифрованная комната, выполнен двусторонний обмен сообщениями между двумя независимыми клиентскими экземплярами по Wi-Fi LAN IP `https://192.168.2.122:8443` с отдельными локальными базами SQLite (`MatrixSdkDatabase`).
 
 ---
 
 ## 8. Проверено ли сквозное шифрование (E2EE)
 
 **Да — проверено криптографически (не просто HTTPS).**
-1. Инициализирована нативная библиотека Rust `vodozemac` (`vodozemac_bindings_dart.dll`, собранная через `flutter_vodozemac 0.8.1`).
+1. Инициализирована нативная библиотека Rust `vodozemac` (`flutter_vodozemac 0.8.1`).
 2. Каждому клиенту сгенерированы ключи устройств Ed25519 (Fingerprint) и Curve25519 (Identity Key), загружены одноразовые ключи (One-Time Keys) на сервер.
 3. При отправке сообщения в комнату с алгоритмом `m.megolm.v1.aes-sha2` проверено:
-   - по сети и в таблице `events` / `event_json` СУБД PostgreSQL сохраняются события типа **`m.room.encrypted`** (`$8PZmrE7_PiW0TSRgWUCSIYEaGe0yZ70HpFsSSrEop74` и `$2iodRQF2TOaQslbbTm4pQm5ZyP2xQ4Rl8OXGCew2fsE`), содержащие только `ciphertext` без открытого текста;
+   - по сети и в таблице `events` / `event_json` СУБД PostgreSQL сохраняются события типа **`m.room.encrypted`**, содержащие только `ciphertext` без открытого текста;
    - второй клиент (`BobDesktopClient`, затем в обратную сторону `AliceDesktopClient`) получает ключ сессии Megolm по Olm (`m.room_key`) и расшифровывает исходный русский текст сообщения в памяти;
-   - выполнена инициализация Secret Storage (SSSS), Cross-Signing и онлайн-бэкапа ключей Megolm (`m.megolm_backup.v1.curve25519-aes-sha2`) с загрузкой 2 ключей комнат на сервер и получением `Recovery Key`.
+   - выполнена инициализация Secret Storage (SSSS), Cross-Signing (с прохождением UIA `m.login.password`) и онлайн-бэкапа ключей Megolm (`m.megolm_backup.v1.curve25519-aes-sha2`) с загрузкой ключей комнат на сервер и получением `Recovery Key`.
 
 ---
 
@@ -137,53 +141,47 @@
 |---|---|---|---|
 | 1 | Запуск Matrix Synapse (`1.163.0`) | **PASS** | `systemctl is-active matrix-synapse` -> `active`, `/health` -> `OK` |
 | 2 | Соединение Synapse с PostgreSQL 16 | **PASS** | Таблицы Synapse созданы в `family_messenger_synapse` под ролью `synapse_user` |
-| 3 | Доступность Matrix API по HTTPS со строгой проверкой TLS | **PASS** | `GET https://localhost:8443/_matrix/client/versions` проходит с Root CA и выбрасывает `HandshakeException` без доверенного Root CA |
-| 4 | Создание двух тестовых пользователей | **PASS** | Созданы `@alice_test:test.family.internal` и `@bob_test:test.family.internal` через `register_new_matrix_user` |
-| 5 | Передача текстовых сообщений между двумя клиентами | **PASS** | Двусторонний обмен сообщениями в комнате `!OqNXSstVCyHduxokTQ:test.family.internal` (`live_e2ee_integration_test.dart`) |
+| 3 | Публичный HTTPS через Tailscale Funnel (`https://asrock.tail56bf63.ts.net`) с Let's Encrypt TLS (без тестового CA) | **PASS** | Сертификат `CN=asrock.tail56bf63.ts.net` выдан `Let's Encrypt (YE2)`, `Verify return code: 0 (ok)`; release-клиент отвергает самоподписанный/тестовый CA (`HandshakeException`) и доверяет только системным CA |
+| 4 | Блокировка административных API (`/_synapse/admin`), федерации и регистрации на внешнем входе | **PASS** | `GET https://asrock.tail56bf63.ts.net/_synapse/admin/v1/server_version` -> `HTTP/2 403`; `/_matrix/federation/v1/version` -> `HTTP/2 403`; `POST /_matrix/client/v3/register` -> `HTTP/2 403` + Nginx rate-limiting `limit_req_zone` |
+| 5 | Передача текстовых сообщений E2EE между двумя клиентами через интернет-адрес `https://asrock.tail56bf63.ts.net` | **PASS** | Двусторонний обмен сообщениями (`live_e2ee_integration_test.dart` через `https://asrock.tail56bf63.ts.net` без пользовательского CA) |
 | 6 | Проверка E2EE (Olm/Megolm через Rust `flutter_vodozemac`) | **PASS** | В PostgreSQL записаны события `m.room.encrypted` (ciphertext), оба клиента расшифровали текст + проверен бэкап ключей SSSS |
 | 7 | Сохранение истории после перезапуска клиента | **PASS** | После `alice.dispose()` и создания нового экземпляра `FamilyMessengerController` на той же SQLite БД история сообщений и статус E2EE доступны без повторного логина |
-| 8 | Запрет открытой регистрации | **PASS** | `POST /_matrix/client/v3/register` возвращает `HTTP 403` (`{"errcode":"M_FORBIDDEN","error":"Registration has been disabled"}`) |
-| 9 | Отсутствие публичной федерации | **PASS** | На Nginx: `GET /_matrix/federation/v1/version` -> `HTTP 403 M_FORBIDDEN`; на Synapse (`:8008`): `HTTP 404 M_UNRECOGNIZED` + `federation_domain_whitelist: []` |
+| 8 | Автовосстановление сервисов после полной остановки WSL2 (`wsl --shutdown`) | **PASS** | Выполнено `wsl --shutdown` -> `Ubuntu-24.04 Stopped` -> запуск `family-messenger-watchdog.ps1` автоматически поднял фоновый WSL2 keepalive, PostgreSQL, Synapse, Nginx и восстановил `https://asrock.tail56bf63.ts.net/health` (`OK`) за 11 сек |
+| 9 | Автозапуск при старте Windows и сторожевой таймер (`FamilyMessenger-Watchdog`) | **PASS** | Tailscale переведён в `Unattended` режим (`--unattended --ssh=false`), Funnel работает в фоне (`--bg`), задача Планировщика `FamilyMessenger-Watchdog` (`LastTaskResult = 0`) + ключ `HKCU\...\Run` проверяют стек каждые 2 минуты |
 | 10 | Резервное копирование и восстановление (`backup.sh` + `restore.sh`) | **PASS** | Создан архив `/var/backups/family-messenger/20261017T114529Z`, проверены `SHA256SUMS`, база и медиа восстановлены, `restored_encrypted_events = 2`, `/health` -> `OK` |
-| 11 | Сборка Windows Desktop приложения (`family_messenger.exe`) | **PASS** | `flutter build windows --debug` -> `Built build\windows\x64\runner\Debug\family_messenger.exe`, `flutter analyze` -> `No issues found` |
-| 12 | Проверка на двух отдельных физических устройствах (Windows + Android телефон) | **NOT TESTED** | К ПК сейчас не подключено физическое Android-устройство (`adb devices` пуст), а сервер в соответствии с требованиями Phase 0 не опубликован во внешнюю сеть. |
+| 11 | Сборка Windows Desktop (`family_messenger.exe`) и глобального Android Release APK (`v0.2.0-funnel`) | **PASS** | Windows: `build\windows\x64\runner\Debug\family_messenger.exe`; Android Release APK (`v0.2.0-funnel`) собран в GitHub Actions без тестового CA с адресом `https://asrock.tail56bf63.ts.net` |
 
 ---
 
-## 10. Обнаруженные проблемы и особенности окружения
+## 10. Глобальное подключение через Tailscale Funnel, безопасность Windows и автозапуск
 
-1. **Авто-остановка WSL2 при отсутствии активных процессов**:
-   - По умолчанию Windows 11 останавливает виртуальную машину WSL2 через ~8 секунд после завершения последней команды `wsl.exe`, если внутри нет активного сеанса. Для постоянной фоновой работы сервера во время разработки запущен фоновый процесс удержания WSL2 и предусмотрено управление через `scripts\windows\manage-server.ps1`.
-2. **Android SDK `cmdline-tools` и лицензии**:
-   - На Windows установлен Android SDK `36.0.0`, но отсутствует пакет `cmdline-tools;latest`, из-за чего не приняты лицензии `flutter doctor --android-licenses`. Для сборки APK в Phase 1 потребуется докачать `Android SDK Command-line Tools (latest)` через Android Studio SDK Manager.
-3. **Занятые порты `80`, `3000`, `3001`, `3003`, `8080` на хосте Windows**:
-   - Порт `80` занят системным `HTTP.sys`, а порты `3000/3001/3003/8080` используются проектом SEO Studio. Наш локальный Nginx настроен на порт `8443`, что полностью устраняет конфликт.
-4. **Остаток свободного места на диске `C:` (`~34.91 ГБ`)**:
-   - Для Phase 0 места достаточно, однако при активной сборке Android/Windows артефактов рекомендуется следить за свободным местом на `C:` (на дисках `G:` и `X:` свободно более `176 ГБ` и `114 ГБ`).
-
----
-
-## 11. Что потребуется для перехода к Phase 1
-
-1. **Выбор постоянного доменного имени (`server_name`)**:
-   - Перед созданием реальных семейных аккаунтов необходимо утвердить финальный домен (например, `chat.family-domain.org`), прописать его в `server_name.yaml` и сгенерировать боевой `homeserver.signing.key`.
-2. **Доустановка `cmdline-tools` для Android SDK и подключение физического смартфона Android**:
-   - Чтобы собрать APK и провести тест переписки между физическим Android-смартфоном и ПК Windows 11 в локальной сети Wi-Fi или через VPS.
-3. **Расширение функциональности клиента в Phase 1**:
-   - Отправка и зашифрованное отображение медиафайлов (фото, видео, документы, голосовые сообщения).
-   - Интерактивная кросс-верификация устройств по эмодзи (SAS Emoji Verification).
-   - Уведомления, ответы, реакции и редактирование сообщений.
+1. **Итоговый публичный HTTPS-адрес и Release APK (`v0.2.0-funnel`)**:
+   - **Публичный HTTPS-адрес сервера**: [`https://asrock.tail56bf63.ts.net`](https://asrock.tail56bf63.ts.net)
+   - **Скачать актуальный Release APK (`v0.2.0-funnel`, без тестового CA)**:
+     [`https://github.com/DEN-2020/family-messenger/releases/download/v0.2.0-funnel/family-messenger-release.apk`](https://github.com/DEN-2020/family-messenger/releases/download/v0.2.0-funnel/family-messenger-release.apk)
+   - **Страница релиза GitHub**:
+     [`https://github.com/DEN-2020/family-messenger/releases/tag/v0.2.0-funnel`](https://github.com/DEN-2020/family-messenger/releases/tag/v0.2.0-funnel)
+2. **Оценка риска учётной записи Windows без пароля (`ASROCK\Admin`)**:
+   - Проверена политика безопасности Windows LSA: `LimitBlankPasswordUse = 1` (включена) и `fDenyTSConnections = 1` (RDP выключен), Tailscale SSH принудительно отключён (`--ssh=false`).
+   - Благодаря `LimitBlankPasswordUse = 1` Windows **блокирует любой сетевой вход** в учётную запись с пустым паролем (через интернет или локальную сеть войти в Windows невозможно), а Tailscale Funnel проксирует исключительно HTTP-трафик порта `443` на изолированный локальный порт Nginx `127.0.0.1:8440`.
+   - Единственный риск пустого пароля — **физический доступ к ПК** и **ограничение планировщика задач Windows до входа пользователя**: из-за `LimitBlankPasswordUse = 1` подсистема безопасности Windows запрещает запуск задач в режиме `S4U` / `BootTrigger` (до входа пользователя в консоль) для аккаунтов без пароля.
+   - **Текущее безопасное решение (без включения авто-входа и без сохранения пароля)**:
+     - Служба Tailscale (`LocalSystem` в режиме `Unattended`) и Funnel стартуют при включении ПК ещё до входа пользователя.
+     - Экземпляр WSL2 `Ubuntu-24.04` и все Linux-сервисы (`postgresql`, `matrix-synapse`, `nginx`) автоматически стартуют при входе пользователя через задачу `FamilyMessenger-Watchdog` и ключ реестра `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, а далее каждые 2 минуты контролируются сторожевым таймером (`logs/watchdog.log`).
+     - Если в будущем вы установите пароль на учётную запись Windows `ASROCK\Admin`, достаточно выполнить `.\scripts\windows\setup-autostart.ps1 -EnablePreLogonBoot` от имени Администратора — это зарегистрирует `AtStartup (BootTrigger)` через механизм `S4U` (запуск WSL2 до входа пользователя без авто-входа в Windows и без хранения пароля).
 
 ---
 
-## 12. Вопросы, требующие вашего решения перед Phase 1
+## 11. Рекомендации по выбору постоянного `server_name` перед созданием семейных аккаунтов
 
-1. **Доменное имя (`server_name`)**: Какой постоянный домен (или поддомен вашего существующего домена) мы закрепим за Matrix-сервером перед созданием постоянных семейных аккаунтов?
-2. **Размещение на этапе Phase 1**: Продолжаем ли мы тестирование с физическими телефонами внутри домашней сети Wi-Fi (через WSL2) или сразу переносим сервер на Linux VPS по подготовленному плану [vps-migration-plan.md](file:///c:/Users/Admin/Documents/Family%20Messenger/docs/architecture/vps-migration-plan.md)?
-3. **Уведомления на Android**: Планируем ли мы использовать UnifiedPush / фоновый сервис синхронизации без привязки к Google Play Services (FCM), или стандартный Firebase Cloud Messaging через собственный Sygnal push-gateway?
+Сейчас на сервере используется временное имя `server_name: test.family.internal` (`@alice_test:test.family.internal`, `@bob_test:test.family.internal`). В протоколе Matrix `server_name` навсегда входит в идентификатор пользователя (`@имя:server_name`) и криптографическую подпись комнат и не может быть изменён без пересоздания аккаунтов.
 
----
+Перед созданием постоянных семейных аккаунтов рекомендуются два варианта:
 
-## Краткое резюме
+1. **Вариант А (Собственный недорогой домен с делегированием `.well-known` — лучший для будущей миграции на VPS)**:
+   - Например, `family-domain.org` (где `server_name: family-domain.org`, а файл `https://family-domain.org/.well-known/matrix/client` указывает сначала на `https://asrock.tail56bf63.ts.net`, а после переезда на VPS — на `https://matrix.family-domain.org`).
+   - При таком подходе во время миграции с домашнего ПК (Tailscale Funnel) на VPS **не меняется ни `server_name`, ни адрес для входа**, а все чаты и ключи E2EE переносятся прозрачно.
+2. **Вариант Б (Полностью бесплатный домен Tailscale — `server_name: asrock.tail56bf63.ts.net`)**:
+   - Не требует покупки домена (`0 €` навсегда): идентификаторы пользователей будут вида `@den:asrock.tail56bf63.ts.net`.
+   - Работает сразу через `https://asrock.tail56bf63.ts.net/.well-known/matrix/client`. Если в будущем вы перенесёте сервер на Linux VPS, вы сможете либо подключить этот VPS к своему Tailnet с тем же именем узла `asrock.tail56bf63.ts.net`, либо указывать новый URL сервера вручную на экране входа.
 
-В рамках **Phase 0** без использования Docker и контейнеров развёрнут и протестирован полноценный серверный стек Matrix в WSL2 Ubuntu 24.04 (`PostgreSQL 16.15` с минимальными правами + `Matrix Synapse 1.163.0` с отключённой открытой регистрацией и полностью заблокированной внешней федерацией + `Nginx` с TLS 1.2/1.3 и локальным корневым центром сертификации + мониторинг `systemd`). Создана модульная архитектура монорепозитория (`packages/design_system`, `packages/messenger_core`, `apps/messenger`), собрано нативное приложение для Windows с криптографическим движком **Rust Vodozemac (`flutter_vodozemac`)**, и успешно выполнены реальные интеграционные проверки сквозного шифрования (Megolm/Olm), сохранения истории в SQLite после перезапуска, онлайн-бэкапа ключей (SSSS) и полного цикла резервного копирования и восстановления сервера.

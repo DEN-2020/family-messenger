@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -72,20 +72,21 @@ jobs:
           path: family-messenger-release.apk
           if-no-files-found: error
 
-      - name: Publish APK to GitHub Release (v0.1.0-phase0)
+      - name: Publish APK to GitHub Release (v0.2.0-funnel)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1.0-phase0
-          name: "Family Messenger v0.1.0 (Phase 0 Release APK)"
+          tag_name: v0.2.0-funnel
+          name: "Family Messenger v0.2.0 (Global HTTPS via Tailscale Funnel)"
           body: |
-            ## Family Messenger — Android Release APK (Phase 0)
+            ## Family Messenger — Android Release APK (v0.2.0 Global Internet Release)
             - **Matrix SDK + Rust Vodozemac E2EE** (`m.megolm.v1.aes-sha2`)
-            - **Pre-configured Wi-Fi Homeserver**: `https://192.168.2.122:8443` (with bundled `Family Messenger Test Root CA` for strict TLS verification)
+            - **Public Global Homeserver (HTTPS)**: `https://asrock.tail56bf63.ts.net` (Let's Encrypt TLS certificate, strict OS system CA verification — no custom/test Root CA)
+            - **Works over Mobile Internet (4G/5G/LTE) in any country without VPN**
             - **Test Accounts**:
               - `alice_test` / `AliceTest!2026#Family`
               - `bob_test` / `BobTest!2026#Family`
           files: |
             family-messenger-release.apk
-            infra/reverse-proxy/certs/family-messenger-root-ca.crt
           prerelease: false
           make_latest: true
+

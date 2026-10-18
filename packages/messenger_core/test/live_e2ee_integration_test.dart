@@ -9,14 +9,6 @@ void main() {
       ? Directory.current.parent.parent.path
       : Directory.current.path;
 
-  final rootCaPath = p.join(
-    repoRoot,
-    'infra',
-    'reverse-proxy',
-    'certs',
-    'family-messenger-root-ca.crt',
-  );
-
   String resolveVodozemacDllDir() {
     final candidates = [
       p.join(
@@ -69,55 +61,54 @@ void main() {
       }
     });
 
-    test('Strict TLS rejects connection when Root CA is not trusted', () async {
-      final untrustedHttpClient = HttpClient(
-        context: SecurityContext(withTrustedRoots: false),
+    test('Production TLS client rejects local test Root CA and only trusts official system CAs (Let\'s Encrypt)', () async {
+      final prodHttpClient = HttpClient(
+        context: SecurityContext(withTrustedRoots: true),
       );
       await expectLater(
         () async {
-          final req = await untrustedHttpClient.getUrl(
+          final req = await prodHttpClient.getUrl(
             Uri.parse('https://localhost:8443/_matrix/client/versions'),
           );
           await req.close();
         },
         throwsA(isA<HandshakeException>()),
       );
-      untrustedHttpClient.close(force: true);
+      prodHttpClient.close(force: true);
     });
 
     test(
-      'Two clients authenticate, exchange Megolm E2EE messages, persist history across restart, and bootstrap SSSS key backup',
+      'Two clients authenticate over public Tailscale Funnel HTTPS (Let\'s Encrypt), exchange Megolm E2EE messages, persist history across restart, and bootstrap SSSS key backup',
       () async {
         final aliceStore = p.join(tempStoreDir.path, 'alice_store');
         final bobStore = p.join(tempStoreDir.path, 'bob_store');
 
+        // Zero custom Root CA passed — strictly uses OS system Root CAs (Let's Encrypt)
         final alice = FamilyMessengerController(
           clientName: 'AliceDesktopClient',
           storageDirectoryPath: aliceStore,
-          trustedRootCaPemPath: rootCaPath,
         );
         final bob = FamilyMessengerController(
           clientName: 'BobDesktopClient',
           storageDirectoryPath: bobStore,
-          trustedRootCaPemPath: rootCaPath,
         );
 
         await alice.initialize(vodozemacLibraryPath: dllDir);
         await bob.initialize(vodozemacLibraryPath: dllDir);
 
-        // 1. Check Homeserver over strict TLS on Wi-Fi LAN IP
-        const lanHomeserverUrl = 'https://192.168.2.122:8443';
-        final versions = await alice.checkHomeserver(lanHomeserverUrl);
+        // 1. Check Homeserver over public Tailscale Funnel HTTPS (Let's Encrypt TLS)
+        const publicHomeserverUrl = 'https://asrock.tail56bf63.ts.net';
+        final versions = await alice.checkHomeserver(publicHomeserverUrl);
         expect(versions, contains('v1.11'));
 
-        // 2. Login Alice & Bob over Wi-Fi LAN IP
+        // 2. Login Alice & Bob over public Tailscale Funnel HTTPS
         await alice.login(
-          homeserverUrl: lanHomeserverUrl,
+          homeserverUrl: publicHomeserverUrl,
           username: 'alice_test',
           password: 'AliceTest!2026#Family',
         );
         await bob.login(
-          homeserverUrl: lanHomeserverUrl,
+          homeserverUrl: publicHomeserverUrl,
           username: 'bob_test',
           password: 'BobTest!2026#Family',
         );
@@ -212,7 +203,6 @@ void main() {
         final aliceRestarted = FamilyMessengerController(
           clientName: 'AliceDesktopClient',
           storageDirectoryPath: aliceStore,
-          trustedRootCaPemPath: rootCaPath,
         );
         await aliceRestarted.initialize(vodozemacLibraryPath: dllDir);
 
@@ -236,7 +226,7 @@ void main() {
 
         await aliceRestarted.dispose();
       },
-      timeout: const Timeout(Duration(minutes: 2)),
+      timeout: const Timeout(Duration(minutes: 4)),
     );
   });
 }

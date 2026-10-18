@@ -65,7 +65,9 @@ pubspec.lock
 *.hive
 *.lock
 
-# OS generated
+# OS generated & local runtime logs/builds
 .DS_Store
 Thumbs.db
 Desktop.ini
+logs/
+*.apk

@@ -59,6 +59,17 @@ cd apps\messenger
 C:\tools\flutter\bin\flutter.bat run -d windows
 ```
 
+### 4. Установка на Android и работа через интернет в любой стране (`https://asrock.tail56bf63.ts.net`)
+- **Публичный HTTPS-адрес сервера (Let's Encrypt TLS)**:
+  `https://asrock.tail56bf63.ts.net`
+- **Скачать готовый Release APK (`v0.2.0-funnel`, GitHub Releases)**:
+  [`https://github.com/DEN-2020/family-messenger/releases/download/v0.2.0-funnel/family-messenger-release.apk`](https://github.com/DEN-2020/family-messenger/releases/download/v0.2.0-funnel/family-messenger-release.apk)
+- **Настройка автозапуска и сторожевого таймера (Watchdog каждые 2 минуты)**:
+  ```powershell
+  .\scripts\windows\setup-autostart.ps1
+  ```
+- В release APK используется **только системное хранилище сертификатов ОС (Let's Encrypt)** без тестового корневого ЦС, и предустановлен внешний адрес `https://asrock.tail56bf63.ts.net`. Работает через мобильный интернет (4G/5G/LTE) и любой Wi-Fi без установки VPN на телефоны.
+
 ---
 
 ## Документация

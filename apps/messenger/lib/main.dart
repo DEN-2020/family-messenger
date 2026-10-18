@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:messenger_core/messenger_core.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -11,23 +10,13 @@ import 'package:path_provider/path_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Uint8List? rootCaBytes;
-  try {
-    final byteData = await rootBundle.load(
-      'assets/certs/family-messenger-root-ca.crt',
-    );
-    rootCaBytes = byteData.buffer.asUint8List();
-  } catch (_) {
-    // Public CA fallback when running against public Let's Encrypt VPS
-  }
-
   final supportDir = await getApplicationSupportDirectory();
   final storagePath = p.join(supportDir.path, 'family_messenger_store');
 
+  // Strict OS System Root CA verification only (Let's Encrypt via Tailscale Funnel)
   final controller = FamilyMessengerController(
     clientName: 'FamilyMessenger-${Platform.operatingSystem}',
     storageDirectoryPath: storagePath,
-    trustedRootCaPemBytes: rootCaBytes,
   );
   await controller.initialize();
 
@@ -155,7 +144,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _homeserverCtrl = TextEditingController(
-    text: 'https://192.168.2.122:8443',
+    text: 'https://asrock.tail56bf63.ts.net',
   );
   final _usernameCtrl = TextEditingController(text: 'alice_test');
   final _passwordCtrl = TextEditingController();

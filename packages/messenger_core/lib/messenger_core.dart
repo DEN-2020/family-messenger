@@ -308,6 +308,10 @@ class FamilyMessengerController {
       ],
     );
     await client.oneShotSync();
+    final room = client.getRoomById(roomId);
+    if (room != null && !room.encrypted) {
+      await client.oneShotSync();
+    }
     return roomId;
   }
 
