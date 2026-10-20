@@ -276,10 +276,14 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     final room = widget.controller.client.getRoomById(widget.roomId);
 
     if (room == null) {
-      return const FamilyEmptyState(
-        icon: Icons.chat_bubble_outline_rounded,
-        title: 'Беседа не выбрана',
-        subtitle: 'Выберите чат из списка или начните новую семейную беседу.',
+      return const Scaffold(
+        body: Center(
+          child: FamilyEmptyState(
+            icon: Icons.chat_bubble_outline_rounded,
+            title: 'Беседа не выбрана',
+            subtitle: 'Выберите чат из списка или начните новую семейную беседу.',
+          ),
+        ),
       );
     }
 
@@ -299,19 +303,25 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         )
         .toList();
 
-    return Column(
-      children: [
-        // Conversation Header Bar
-        Material(
-          color: palette.sidebarSurface,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: FamilySpacing.sm,
-                vertical: FamilySpacing.sm,
-              ),
-              child: Row(
+    return Scaffold(
+      backgroundColor: palette.cardSurface,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: [
+            // Conversation Header Bar
+            Material(
+              color: palette.sidebarSurface,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FamilySpacing.sm,
+                    vertical: FamilySpacing.sm,
+                  ),
+                  child: Row(
                 children: [
                   if (widget.showBackButton)
                     IconButton(
@@ -397,6 +407,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                     )
                   : ListView.builder(
                       reverse: true,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       padding: const EdgeInsets.symmetric(
                         horizontal: FamilySpacing.md,
                         vertical: FamilySpacing.md,
@@ -646,6 +658,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
           ),
         ),
       ],
-    );
+    ),
+  ),
+);
   }
 }

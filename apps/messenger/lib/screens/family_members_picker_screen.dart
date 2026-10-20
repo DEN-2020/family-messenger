@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:messenger_core/messenger_core.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 /// Screen 5: Family Members Directory & Picker Screen.
 /// Allows starting a personal 1-on-1 chat by tapping a family member from the visual list,
@@ -140,24 +141,58 @@ class _FamilyMembersPickerScreenState extends State<FamilyMembersPickerScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              'Ваш код для отправки близкому (действует 24 ч):',
+                              'Ваш семейный QR-код (действует 24 часа):',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: palette.textSecondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: palette.textPrimary,
                               ),
+                            ),
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: palette.borderSubtle,
+                                  ),
+                                ),
+                                child: QrImageView(
+                                  data: myGeneratedCode,
+                                  version: QrVersions.auto,
+                                  size: 150.0,
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            FilledButton.icon(
+                              onPressed: () {
+                                final shareText =
+                                    FamilyInviteToken.formatShareMessage(
+                                  inviteCode: myGeneratedCode!,
+                                  inviterDisplayName:
+                                      widget.controller.currentUserDisplayName,
+                                );
+                                Clipboard.setData(
+                                  ClipboardData(text: shareText),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Приглашение со ссылкой скопировано для отправки в Telegram/WhatsApp',
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.send_rounded, size: 16),
+                              label: const Text('Скопировать текст приглашения'),
                             ),
                             const SizedBox(height: 6),
-                            SelectableText(
-                              myGeneratedCode,
-                              maxLines: 2,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                color: palette.primaryPine,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
                             OutlinedButton.icon(
                               onPressed: () {
                                 Clipboard.setData(
@@ -166,11 +201,12 @@ class _FamilyMembersPickerScreenState extends State<FamilyMembersPickerScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Код приглашения скопирован'),
+                                    behavior: SnackBarBehavior.floating,
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.copy_rounded, size: 17),
-                              label: const Text('Скопировать мой код'),
+                              icon: const Icon(Icons.copy_rounded, size: 16),
+                              label: const Text('Скопировать только код'),
                             ),
                           ],
                         ),
@@ -180,8 +216,8 @@ class _FamilyMembersPickerScreenState extends State<FamilyMembersPickerScreen> {
                     TextField(
                       controller: codeInputCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Вставьте код приглашения от близкого',
-                        hintText: 'FAM1-...',
+                        labelText: 'Вставьте код или приглашение от близкого',
+                        hintText: 'FAM1-... или полное сообщение',
                         prefixIcon: Icon(Icons.qr_code_rounded),
                       ),
                     ),

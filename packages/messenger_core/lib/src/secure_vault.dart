@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// OS Secure Storage wrapper (Android Keystore / EncryptedSharedPreferences,
@@ -29,10 +28,10 @@ class SecureVaultService {
     _memoryFallback[key] = value;
     if (_isHeadlessFlutterTest) return;
     try {
-      await _storage.write(key: key, value: value);
-    } on MissingPluginException {
-      // Headless widget/unit test environment
-    } on PlatformException {
+      await _storage
+          .write(key: key, value: value)
+          .timeout(const Duration(milliseconds: 600), onTimeout: () {});
+    } catch (_) {
       // Fallback already stored in _memoryFallback for current session
     }
   }
@@ -42,14 +41,14 @@ class SecureVaultService {
       return _memoryFallback[key];
     }
     try {
-      final val = await _storage.read(key: key);
+      final val = await _storage
+          .read(key: key)
+          .timeout(const Duration(milliseconds: 600), onTimeout: () => null);
       if (val != null) {
         _memoryFallback[key] = val;
         return val;
       }
-    } on MissingPluginException {
-      // Headless widget/unit test environment
-    } on PlatformException {
+    } catch (_) {
       // Ignore and fallback
     }
     return _memoryFallback[key];
@@ -59,10 +58,10 @@ class SecureVaultService {
     _memoryFallback.remove(key);
     if (_isHeadlessFlutterTest) return;
     try {
-      await _storage.delete(key: key);
-    } on MissingPluginException {
-      // Headless widget/unit test environment
-    } on PlatformException {
+      await _storage
+          .delete(key: key)
+          .timeout(const Duration(milliseconds: 600), onTimeout: () {});
+    } catch (_) {
       // Ignore
     }
   }

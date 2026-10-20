@@ -72,18 +72,18 @@ jobs:
           path: family-messenger-release.apk
           if-no-files-found: error
 
-      - name: Publish APK to GitHub Release (v0.3.0-phase1)
+      - name: Publish APK to GitHub Release (v0.3.1-phase1)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.3.0-phase1
-          name: "Family Messenger v0.3.0 (Phase 1 UX/UI Overhaul)"
+          tag_name: v0.3.1-phase1
+          name: "Family Messenger v0.3.1 (Fix Virtual Keyboard & Visual QR Sharing)"
           body: |
-            ## Family Messenger — Android Release APK (v0.3.0 Phase 1 UX/UI Overhaul)
-            - **Warm Consumer UI ("Hearth & Nordic Linen" v2)**: Light & Dark themes, adaptive mobile/tablet/desktop layouts, human names, gradient avatars, unread counters, delivery checkmarks, and reply quotes.
-            - **Family Directory & Group Creation**: Pick family members visually from the directory, create encrypted family groups, or share signed 24-hour invitation codes (`FAM1-...`).
-            - **Explicit Invitation Confirmation**: Incoming room invitations require explicit user confirmation (`Принять` / `Отклонить`).
-            - **Security & Recovery Wizard**: Step-by-step chat backup & restore wizard, local 4-digit PIN lock (`flutter_secure_storage`), and honest cryptographic device verification.
-            - **Global HTTPS Connectivity**: Connects over strict TLS (Let's Encrypt) via Tailscale Funnel without VPN.
+            ## Family Messenger — Android Release APK (v0.3.1)
+            - **Virtual Keyboard Resizing**: The chat conversation screen now automatically adjusts above the Android on-screen keyboard (`resizeToAvoidBottomInset: true` with proper `Scaffold` routing), keeping the message composer and draft input fully visible while typing.
+            - **Visual QR Code & Smart Sharing**: Render high-contrast visual QR codes directly in the user profile and family directory (`qr_flutter`). One-click copy generates a complete, formatted invitation message with clickable download links (`https://github.com/DEN-2020/family-messenger/releases/latest`), instructions, and 24-hour expiring signed tokens (`FAM1-...`).
+            - **Tolerant Invite Parsing**: Accepts both raw `FAM1-...` codes and full Telegram/WhatsApp invitation messages, automatically extracting the code without format errors.
+            - **Quick Family Test Switcher**: Tap "Тестовые аккаунты семьи" on the Welcome/Login screen to instantly log in as Alice, Bob, Elena, or Max when testing between PC and mobile.
+            - **Windows Desktop Immediate Launch**: `window.Show()` and safe async storage initialization prevent headless lockups.
           files: |
             family-messenger-release.apk
           prerelease: false

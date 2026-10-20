@@ -79,6 +79,76 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
     }
   }
 
+  static const _testAccounts = [
+    (name: 'Алиса', username: 'alice_test', pass: 'FamMsg!Alice#9482_Sec', role: 'Мама'),
+    (name: 'Боб', username: 'bob_test', pass: 'FamMsg!Bob#7319_Sec', role: 'Папа'),
+    (name: 'Елена', username: 'elena_test', pass: 'FamMsg!Elena#5812_Sec', role: 'Бабушка'),
+    (name: 'Максим', username: 'max_test', pass: 'FamMsg!Max#6194_Sec', role: 'Сын'),
+  ];
+
+  void _showTestAccountsSheet() {
+    final palette =
+        Theme.of(context).extension<FamilyPalette>() ?? FamilyPalette.light;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Быстрый выбор члена семьи',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: palette.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Выберите аккаунт для быстрой проверки мессенджера на телефоне или компьютере:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: palette.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                for (final acc in _testAccounts)
+                  ListTile(
+                    leading: FamilyAvatar(
+                      title: acc.name,
+                      radius: 20,
+                    ),
+                    title: Text(
+                      acc.name,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text('${acc.role} • ${acc.username}'),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      setState(() {
+                        _usernameCtrl.text = acc.username;
+                        _passwordCtrl.text = acc.pass;
+                        _errorMessage = null;
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _showAdvancedServerSheet() async {
     final serverCtrl = TextEditingController(
       text: _customServerOverride ??
@@ -380,6 +450,15 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
                     style: TextStyle(
                       fontSize: 12.5,
                       color: palette.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: FamilySpacing.sm),
+                  TextButton.icon(
+                    key: const Key('login_demo_accounts_btn'),
+                    onPressed: _showTestAccountsSheet,
+                    icon: const Icon(Icons.people_alt_outlined, size: 16),
+                    label: const Text(
+                      'Тестовые аккаунты семьи (для проверки)',
                     ),
                   ),
                 ],

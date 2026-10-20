@@ -136,9 +136,25 @@ class FamilyInviteToken {
     return '$_prefix-$encoded';
   }
 
+  /// Formats a complete, user-friendly invitation message with clickable download links.
+  static String formatShareMessage({
+    required String inviteCode,
+    required String inviterDisplayName,
+  }) {
+    return '👨‍👩‍👧‍👦 Приглашение в семейный мессенджер Family Messenger от «$inviterDisplayName»\n\n'
+        '📥 1. Скачайте приложение:\n'
+        '• Android (APK): https://github.com/DEN-2020/family-messenger/releases/latest\n'
+        '• Релизы и ПК: https://github.com/DEN-2020/family-messenger/releases\n\n'
+        '🔑 2. Код приглашения (действует 24 часа):\n'
+        '$inviteCode\n\n'
+        '💬 3. Как подключиться:\n'
+        'Откройте Family Messenger -> вкладка «Семья» -> «Ввести код приглашения» и вставьте код (или всё это сообщение). Защищённый диалог начнётся автоматически!';
+  }
+
   /// Parses and verifies the integrity and expiration of a family invitation code.
   static FamilyInviteToken parseAndVerify(String rawCode) {
-    final cleaned = rawCode.trim();
+    final match = RegExp(r'FAM1-[A-Za-z0-9_-]+').firstMatch(rawCode);
+    final cleaned = match != null ? match.group(0)! : rawCode.trim();
     if (!cleaned.startsWith('$_prefix-')) {
       throw const FormatException('Неверный формат кода приглашения.');
     }

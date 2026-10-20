@@ -2,6 +2,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:messenger_core/messenger_core.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final FamilyMessengerController controller;
@@ -185,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Family Invite Code Card (24h expiring signed code)
+              // Family Invite Code Card (24h expiring signed code with visual QR code)
               if (_inviteCode != null)
                 Card(
                   child: Padding(
@@ -212,27 +213,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Отправьте этот одноразовый семейный код близкому человеку. Код действует 24 часа.',
+                          'Покажите этот QR-код близкому для сканирования камерой или отправьте приглашение со ссылкой на загрузку.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
+                        const SizedBox(height: 16),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: palette.borderSubtle,
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: QrImageView(
+                              data: _inviteCode!,
+                              version: QrVersions.auto,
+                              size: 180.0,
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
                           key: const Key('profile_copy_invite_btn'),
                           onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: _inviteCode!),
+                            final shareText =
+                                FamilyInviteToken.formatShareMessage(
+                              inviteCode: _inviteCode!,
+                              inviterDisplayName: displayName,
                             );
+                            Clipboard.setData(ClipboardData(text: shareText));
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                  'Семейный код приглашения скопирован',
+                                  'Приглашение со ссылкой скопировано для отправки в Telegram/WhatsApp',
                                 ),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
                           },
-                          icon: const Icon(Icons.copy_rounded, size: 18),
-                          label: const Text('Скопировать код приглашения'),
+                          icon: const Icon(Icons.send_rounded, size: 18),
+                          label: const Text('Скопировать текст приглашения'),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: _inviteCode!));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Код приглашения FAM1 скопирован',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 17),
+                          label: const Text('Скопировать только код'),
                         ),
                       ],
                     ),
