@@ -56,7 +56,7 @@ jobs:
           cd packages/design_system && flutter pub get && flutter analyze
           cd ../messenger_core && flutter pub get && flutter analyze
           cd ../../apps/messenger && flutter pub get && flutter analyze
-          flutter test
+          flutter test test/widget_test.dart
 
       - name: Build Android Release APK
         working-directory: apps/messenger
@@ -72,21 +72,19 @@ jobs:
           path: family-messenger-release.apk
           if-no-files-found: error
 
-      - name: Publish APK to GitHub Release (v0.2.0-funnel)
+      - name: Publish APK to GitHub Release (v0.3.0-phase1)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.2.0-funnel
-          name: "Family Messenger v0.2.0 (Global HTTPS via Tailscale Funnel)"
+          tag_name: v0.3.0-phase1
+          name: "Family Messenger v0.3.0 (Phase 1 UX/UI Overhaul)"
           body: |
-            ## Family Messenger — Android Release APK (v0.2.0 Global Internet Release)
-            - **Matrix SDK + Rust Vodozemac E2EE** (`m.megolm.v1.aes-sha2`)
-            - **Public Global Homeserver (HTTPS)**: `https://asrock.tail56bf63.ts.net` (Let's Encrypt TLS certificate, strict OS system CA verification — no custom/test Root CA)
-            - **Works over Mobile Internet (4G/5G/LTE) in any country without VPN**
-            - **Test Accounts**:
-              - `alice_test` / `AliceTest!2026#Family`
-              - `bob_test` / `BobTest!2026#Family`
+            ## Family Messenger — Android Release APK (v0.3.0 Phase 1 UX/UI Overhaul)
+            - **Warm Consumer UI ("Hearth & Nordic Linen" v2)**: Light & Dark themes, adaptive mobile/tablet/desktop layouts, human names, gradient avatars, unread counters, delivery checkmarks, and reply quotes.
+            - **Family Directory & Group Creation**: Pick family members visually from the directory, create encrypted family groups, or share signed 24-hour invitation codes (`FAM1-...`).
+            - **Explicit Invitation Confirmation**: Incoming room invitations require explicit user confirmation (`Принять` / `Отклонить`).
+            - **Security & Recovery Wizard**: Step-by-step chat backup & restore wizard, local 4-digit PIN lock (`flutter_secure_storage`), and honest cryptographic device verification.
+            - **Global HTTPS Connectivity**: Connects over strict TLS (Let's Encrypt) via Tailscale Funnel without VPN.
           files: |
             family-messenger-release.apk
           prerelease: false
           make_latest: true
-

@@ -41,7 +41,11 @@ enable_registration: false
 enable_registration_without_verification: false
 allow_guest_access: false
 require_auth_for_profile_requests: true
-limit_profile_requests_to_users_who_share_rooms: true
+limit_profile_requests_to_users_who_share_rooms: false
+user_directory:
+  enabled: true
+  search_all_users: true
+  prefer_local_users: true
 allow_public_rooms_without_auth: false
 allow_public_rooms_over_federation: false
 default_room_version: "10"
