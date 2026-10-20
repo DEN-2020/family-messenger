@@ -141,14 +141,14 @@ class FamilyInviteToken {
     required String inviteCode,
     required String inviterDisplayName,
   }) {
-    return '👨‍👩‍👧‍👦 Приглашение в семейный мессенджер Family Messenger от «$inviterDisplayName»\n\n'
+    return '💬 Приглашение в мессенджер Family Messenger от «$inviterDisplayName»\n\n'
         '📥 1. Скачайте приложение:\n'
         '• Android (APK): https://github.com/DEN-2020/family-messenger/releases/latest\n'
         '• Релизы и ПК: https://github.com/DEN-2020/family-messenger/releases\n\n'
         '🔑 2. Код приглашения (действует 24 часа):\n'
         '$inviteCode\n\n'
-        '💬 3. Как подключиться:\n'
-        'Откройте Family Messenger -> вкладка «Семья» -> «Ввести код приглашения» и вставьте код (или всё это сообщение). Защищённый диалог начнётся автоматически!';
+        '🚀 3. Как подключиться:\n'
+        'Откройте Family Messenger -> вкладка «Контакты» -> «Пригласить по коду» и вставьте код (или всё это сообщение). Защищённый диалог начнётся автоматически!';
   }
 
   /// Parses and verifies the integrity and expiration of a family invitation code.

@@ -101,7 +101,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Быстрый выбор члена семьи',
+                  'Быстрый выбор контакта',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -299,10 +299,10 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
                   ),
                   const SizedBox(height: FamilySpacing.lg),
                   Text(
-                    'Тёплое общение с близкими',
+                    'Безопасное общение без ограничений',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 23,
+                      fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
                       color: palette.textPrimary,
@@ -310,7 +310,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
                   ),
                   const SizedBox(height: FamilySpacing.xs),
                   Text(
-                    'Закрытый семейный мессенджер. Ваши сообщения и фотографии доступны только членам семьи.',
+                    'Современный защищённый мессенджер. Личные и групповые чаты, передача фото, аудио и документов.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -326,7 +326,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
                     children: const [
                       E2eeSecurityBadge(
                         encrypted: true,
-                        label: 'Личное пространство семьи',
+                        label: 'Сквозное шифрование',
                       ),
                       E2eeSecurityBadge(
                         encrypted: true,
@@ -458,7 +458,7 @@ class _WelcomeLoginScreenState extends State<WelcomeLoginScreen> {
                     onPressed: _showTestAccountsSheet,
                     icon: const Icon(Icons.people_alt_outlined, size: 16),
                     label: const Text(
-                      'Тестовые аккаунты семьи (для проверки)',
+                      'Быстрый выбор контакта (для проверки)',
                     ),
                   ),
                 ],

@@ -149,15 +149,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 8),
                       const E2eeSecurityBadge(
                         encrypted: true,
-                        label: 'Участник семейного круга',
+                        label: 'Подтверждённый профиль',
                       ),
                       const SizedBox(height: 22),
                       TextField(
                         key: const Key('profile_display_name_input'),
                         controller: _nameController,
                         decoration: const InputDecoration(
-                          labelText: 'Ваше имя для родных',
-                          hintText: 'Например: Мама, Папа, Алиса',
+                          labelText: 'Ваше имя',
+                          hintText: 'Например: Александр, Анна',
                           prefixIcon: Icon(Icons.badge_outlined),
                         ),
                       ),
@@ -203,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Пригласить близкого человека',
+                                'Пригласить в мессенджер',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -213,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Покажите этот QR-код близкому для сканирования камерой или отправьте приглашение со ссылкой на загрузку.',
+                          'Покажите этот QR-код для сканирования камерой или отправьте ссылку на подключение.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 16),

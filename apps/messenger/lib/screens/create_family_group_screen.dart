@@ -26,10 +26,10 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
   String? _errorMessage;
 
   static const _quickPresets = [
-    'Наша семья',
-    'Родители и дети',
-    'Семейные планы',
-    'Уютный дом',
+    'Команда',
+    'Планы и идеи',
+    'Уютный чат',
+    'Семья',
   ];
 
   @override
@@ -59,7 +59,7 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) {
       setState(() {
-        _errorMessage = 'Введите название семейной группы.';
+        _errorMessage = 'Введите название группы.';
       });
       return;
     }
@@ -96,7 +96,7 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Новая семейная группа'),
+        title: const Text('Создать группу'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -126,8 +126,8 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
                             key: const Key('group_name_field'),
                             controller: _nameCtrl,
                             decoration: const InputDecoration(
-                              labelText: 'Название семейной группы',
-                              hintText: 'Например: Наша семья',
+                              labelText: 'Название группы',
+                              hintText: 'Например: Команда, Друзья, Планы',
                               prefixIcon: Icon(Icons.groups_2_outlined),
                             ),
                           ),
@@ -149,8 +149,8 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
                           TextField(
                             controller: _topicCtrl,
                             decoration: const InputDecoration(
-                              labelText: 'Описание (по желанию)',
-                              hintText: 'Например: Общие фотографии и новости',
+                              labelText: 'Тема или описание (по желанию)',
+                              hintText: 'Например: Общие планы, фото и обсуждения',
                               prefixIcon: Icon(Icons.notes_rounded),
                             ),
                           ),
@@ -169,7 +169,7 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Пригласить членов семьи',
+                                  'Пригласить участников',
                                   style: TextStyle(
                                     fontSize: 16.5,
                                     fontWeight: FontWeight.w700,
@@ -285,7 +285,7 @@ class _CreateFamilyGroupScreenState extends State<CreateFamilyGroupScreen> {
                           )
                         : const Icon(Icons.check_rounded),
                     label: Text(
-                      _creating ? 'Создаём группу...' : 'Создать семейную группу',
+                      _creating ? 'Создаём группу...' : 'Создать группу',
                     ),
                   ),
                 ],

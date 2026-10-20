@@ -552,6 +552,38 @@ class FamilyMessengerController {
     return eventId;
   }
 
+  /// 6b. Sends a media attachment (photo, video, voice note, document) with Megolm E2EE.
+  Future<String?> sendMediaAttachment(
+    String roomId, {
+    required Uint8List bytes,
+    required String fileName,
+    String? mimeType,
+  }) async {
+    final room = client.getRoomById(roomId);
+    if (room == null) {
+      throw const FormatException('Беседа не найдена.');
+    }
+    if (!room.encrypted) {
+      await room.enableEncryption();
+    }
+    final matrixFile = MatrixFile.fromMimeType(
+      bytes: bytes,
+      name: fileName,
+      mimeType: mimeType,
+    );
+    return await room.sendFileEvent(matrixFile);
+  }
+
+  /// 6c. Downloads and decrypts an attached media file (photo, voice message, document).
+  Future<Uint8List?> downloadAttachment(Event event) async {
+    try {
+      final matrixFile = await event.downloadAndDecryptAttachment();
+      return matrixFile.bytes;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// 7. Forces a sync retry after network interruption.
   Future<void> retryConnection() async {
     _updateStatus(MessengerConnectionStatus.reconnecting);

@@ -72,18 +72,20 @@ jobs:
           path: family-messenger-release.apk
           if-no-files-found: error
 
-      - name: Publish APK to GitHub Release (v0.3.1-phase1)
+      - name: Publish APK to GitHub Release (v0.3.2-phase1)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.3.1-phase1
-          name: "Family Messenger v0.3.1 (Fix Virtual Keyboard & Visual QR Sharing)"
+          tag_name: v0.3.2-phase1
+          name: "Family Messenger v0.3.2 (Voice Messages, Media Attachments & Modern Group UI)"
           body: |
-            ## Family Messenger — Android Release APK (v0.3.1)
-            - **Virtual Keyboard Resizing**: The chat conversation screen now automatically adjusts above the Android on-screen keyboard (`resizeToAvoidBottomInset: true` with proper `Scaffold` routing), keeping the message composer and draft input fully visible while typing.
-            - **Visual QR Code & Smart Sharing**: Render high-contrast visual QR codes directly in the user profile and family directory (`qr_flutter`). One-click copy generates a complete, formatted invitation message with clickable download links (`https://github.com/DEN-2020/family-messenger/releases/latest`), instructions, and 24-hour expiring signed tokens (`FAM1-...`).
-            - **Tolerant Invite Parsing**: Accepts both raw `FAM1-...` codes and full Telegram/WhatsApp invitation messages, automatically extracting the code without format errors.
-            - **Quick Family Test Switcher**: Tap "Тестовые аккаунты семьи" on the Welcome/Login screen to instantly log in as Alice, Bob, Elena, or Max when testing between PC and mobile.
-            - **Windows Desktop Immediate Launch**: `window.Show()` and safe async storage initialization prevent headless lockups.
+            ## Family Messenger — Android Release APK (v0.3.2)
+            - **Modern Messenger Terminology**: Transitioned terms from "семья" to universal modern messenger nomenclature ("Контакты", "Создать группу", "Участники", "Безопасное общение без ограничений").
+            - **Voice Messages (Диктовка голоса)**: Dedicated microphone button in the message composer. Tap or hold to record audio with real-time timer, cancel button, and instant send.
+            - **Native Voice Note Player**: High-fidelity in-chat voice bubble (`FamilyVoiceBubble`) with play/pause toggle, dynamic multi-bar audio waveform visualization, and playback progress tracking.
+            - **Media & File Attachments**: Attachment sheet for sending Gallery Photos, Camera shots, Videos, and Documents (`.pdf`, `.docx`, etc.).
+            - **End-to-End Encryption for All Media**: All photos, voice messages, videos, and files are encrypted client-side using Megolm AES-CTR-256 before upload to Synapse media repository. Decrypted on-the-fly in memory with zero leaks to insecure device storage.
+            - **Full Virtual Keyboard Avoidance**: Message input remains comfortably anchored above virtual keyboards on all screen widths and device orientations.
+            - **Visual QR Sharing**: High-contrast QR codes and one-click smart invitation links for effortless contact sharing.
           files: |
             family-messenger-release.apk
           prerelease: false

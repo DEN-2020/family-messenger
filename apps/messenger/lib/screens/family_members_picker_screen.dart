@@ -303,7 +303,7 @@ class _FamilyMembersPickerScreenState extends State<FamilyMembersPickerScreen> {
                 controller: _searchCtrl,
                 onChanged: _loadDirectory,
                 decoration: InputDecoration(
-                  hintText: 'Найти члена семьи по имени...',
+                  hintText: 'Поиск по контактам...',
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: _searchCtrl.text.isNotEmpty
                       ? IconButton(
@@ -323,12 +323,12 @@ class _FamilyMembersPickerScreenState extends State<FamilyMembersPickerScreen> {
                 children: [
                   ActionChip(
                     avatar: const Icon(Icons.group_add_outlined, size: 18),
-                    label: const Text('Создать семейную группу'),
+                    label: const Text('Создать группу'),
                     onPressed: widget.onCreateGroupRequested,
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.qr_code_rounded, size: 18),
-                    label: const Text('Код приглашения (24 ч)'),
+                    label: const Text('Пригласить по коду'),
                     onPressed: _showInviteCodeSheet,
                   ),
                 ],

@@ -181,13 +181,13 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
           if (_selectedTabIndex == 0) ...[
             IconButton(
               key: const Key('home_new_group_btn'),
-              tooltip: 'Создать семейную группу',
+              tooltip: 'Создать группу',
               onPressed: _openCreateFamilyGroup,
               icon: const Icon(Icons.group_add_rounded),
             ),
             IconButton(
               key: const Key('home_new_direct_chat_btn'),
-              tooltip: 'Написать члену семьи',
+              tooltip: 'Новый чат',
               onPressed: _openDirectChatPicker,
               icon: const Icon(Icons.edit_square),
             ),
@@ -251,9 +251,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
             label: 'Чаты',
           ),
           const NavigationDestination(
-            icon: Icon(Icons.diversity_3_outlined),
-            selectedIcon: Icon(Icons.diversity_3_rounded),
-            label: 'Семья',
+            icon: Icon(Icons.contacts_outlined),
+            selectedIcon: Icon(Icons.contacts_rounded),
+            label: 'Контакты',
           ),
           const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
@@ -299,9 +299,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 label: Text('Чаты'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.diversity_3_outlined),
-                selectedIcon: Icon(Icons.diversity_3_rounded),
-                label: Text('Семья'),
+                icon: Icon(Icons.contacts_outlined),
+                selectedIcon: Icon(Icons.contacts_rounded),
+                label: Text('Контакты'),
               ),
               NavigationRailDestination(
                 icon: Icon(Icons.person_outline_rounded),
@@ -322,10 +322,10 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
               child: Column(
                 children: [
                   AppBar(
-                    title: const Text('Семейные чаты'),
+                    title: const Text('Чаты'),
                     actions: [
                       IconButton(
-                        tooltip: 'Создать семейную группу',
+                        tooltip: 'Создать группу',
                         onPressed: _openCreateFamilyGroup,
                         icon: const Icon(Icons.group_add_rounded),
                       ),
@@ -358,14 +358,14 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                       showBackButton: false,
                     )
                   : FamilyEmptyState(
-                      icon: Icons.favorite_border_rounded,
-                      title: 'Выберите семейный чат',
+                      icon: Icons.chat_bubble_outline_rounded,
+                      title: 'Выберите чат',
                       subtitle:
-                          'Откройте беседу слева или создайте новую семейную группу.',
+                          'Откройте беседу слева или создайте новую группу.',
                       action: FilledButton.icon(
                         onPressed: _openCreateFamilyGroup,
                         icon: const Icon(Icons.group_add_rounded),
-                        label: const Text('Создать семейную группу'),
+                        label: const Text('Создать группу'),
                       ),
                     ),
             ),
@@ -567,15 +567,15 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   String _titleForTab(int index) {
     switch (index) {
       case 0:
-        return 'Семейные чаты';
+        return 'Чаты';
       case 1:
-        return 'Семья';
+        return 'Контакты';
       case 2:
         return 'Мой профиль';
       case 3:
         return 'Защита и настройки';
       default:
-        return 'Family Messenger';
+        return 'Чаты';
     }
   }
 }

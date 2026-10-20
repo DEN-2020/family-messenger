@@ -770,6 +770,7 @@ class FamilyMessageBubble extends StatelessWidget {
   final MessageDeliveryUiState deliveryState;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final Widget? mediaWidget;
 
   const FamilyMessageBubble({
     super.key,
@@ -782,6 +783,7 @@ class FamilyMessageBubble extends StatelessWidget {
     this.deliveryState = MessageDeliveryUiState.delivered,
     this.onTap,
     this.onLongPress,
+    this.mediaWidget,
   });
 
   @override
@@ -890,14 +892,19 @@ class FamilyMessageBubble extends StatelessWidget {
                   ),
                 ),
               ],
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.38,
-                  color: fg,
+              if (mediaWidget != null) ...[
+                mediaWidget!,
+                if (text.isNotEmpty) const SizedBox(height: 6),
+              ],
+              if (text.isNotEmpty)
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.38,
+                    color: fg,
+                  ),
                 ),
-              ),
               const SizedBox(height: 3),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -924,6 +931,179 @@ class FamilyMessageBubble extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Modern voice message bubble with Play/Pause button, animated waveform bars, and duration.
+class FamilyVoiceBubble extends StatelessWidget {
+  final bool isPlaying;
+  final String durationText;
+  final double progress; // 0.0 to 1.0
+  final bool isMine;
+  final VoidCallback onPlayPause;
+
+  const FamilyVoiceBubble({
+    super.key,
+    required this.isPlaying,
+    required this.durationText,
+    this.progress = 0.0,
+    required this.isMine,
+    required this.onPlayPause,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final waveColor =
+        isMine ? Colors.white.withValues(alpha: 0.45) : Colors.black26;
+    final activeWave = isMine ? Colors.white : const Color(0xFF235745);
+
+    // 16 decorative waveform bar heights
+    const bars = [8, 14, 22, 12, 18, 26, 16, 20, 24, 14, 22, 10, 18, 20, 14, 10];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: isMine
+                  ? Colors.white.withValues(alpha: 0.22)
+                  : const Color(0xFF235745),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(36, 36),
+            ),
+            icon: Icon(
+              isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              size: 22,
+            ),
+            onPressed: onPlayPause,
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < bars.length; i++)
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                      width: 3,
+                      height: bars[i].toDouble(),
+                      decoration: BoxDecoration(
+                        color: (i / bars.length) <= progress
+                            ? activeWave
+                            : waveColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                durationText,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isMine
+                      ? Colors.white.withValues(alpha: 0.85)
+                      : Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Modern file / document attachment card with icon, title, and size.
+class FamilyFileAttachmentBubble extends StatelessWidget {
+  final String fileName;
+  final String sizeLabel;
+  final bool isMine;
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const FamilyFileAttachmentBubble({
+    super.key,
+    required this.fileName,
+    required this.sizeLabel,
+    required this.isMine,
+    this.icon = Icons.insert_drive_file_rounded,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isMine
+        ? Colors.white.withValues(alpha: 0.18)
+        : Colors.black.withValues(alpha: 0.05);
+    final fg = isMine ? Colors.white : Colors.black87;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isMine
+                    ? Colors.white.withValues(alpha: 0.22)
+                    : const Color(0xFF235745),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 10),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    fileName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: fg,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    sizeLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isMine ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
