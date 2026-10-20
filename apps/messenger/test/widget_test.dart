@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:design_system/design_system.dart';
 import 'package:family_messenger/screens/backup_wizard_screen.dart';
@@ -12,7 +11,6 @@ import 'package:family_messenger/screens/settings_security_screen.dart';
 import 'package:family_messenger/screens/welcome_login_screen.dart';
 import 'package:family_messenger/state/app_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:messenger_core/messenger_core.dart';
